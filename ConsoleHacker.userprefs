@@ -1,12 +1,10 @@
 ﻿<Properties StartupItem="Assembly-CSharp.csproj">
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/Game.cs">
     <Files>
-      <File FileName="Assets/Scripts/ChangeButton.cs" Line="14" Column="9" />
-      <File FileName="Assets/Scripts/Word.cs" Line="9" Column="6" />
+      <File FileName="Assets/Scripts/Word.cs" Line="1" Column="1" />
       <File FileName="Assets/Scripts/ButtonTypeEnum.cs" Line="1" Column="1" />
-      <File FileName="Assets/Scripts/Game.cs" Line="65" Column="3" />
-      <File FileName="Assets/Scripts/GameMonitor.cs" Line="5" Column="25" />
+      <File FileName="Assets/Scripts/Game.cs" Line="21" Column="30" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
