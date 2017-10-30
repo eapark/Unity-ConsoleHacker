@@ -19,7 +19,7 @@ public class LineClass {
 
 public class Game : MonoBehaviour {
 	private LineClass[] strings;
-	private string[] selectedWords;
+	private List<string> selectedWords;
 	private int maxTries = 4;
 	private int tries;
 	public bool answerFound = false;
@@ -40,6 +40,9 @@ public class Game : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+
+		ParseDict newDict = new ParseDict ();
+
 		// Get Panels and Canvas
 		canvas = GameObject.Find("Canvas");
 		leftPanel = GameObject.Find ("LeftPanel");
@@ -63,13 +66,12 @@ public class Game : MonoBehaviour {
 
 		tries = maxTries;
 
-		// Choose 15 random words
-		selectedWords = new string[]{"hello", "mello", "jello", "gello", "yello"};
-		int numWords = selectedWords.Length;
+		// Get selected words
+		selectedWords = new List<string>( newDict.SelectWords("novice") );
+		int numWords = selectedWords.Count;
 		wordLength = selectedWords[0].Length;
 
-		// Randomly choose an answer
-		answer = selectedWords[ Random.Range(0, numWords) ];
+		answer = selectedWords[0];
 
 		// Make hints, which are special characters enclosed in brackets
 		// and which remove a wrong password or give an extra try upon clicking
@@ -147,6 +149,7 @@ public class Game : MonoBehaviour {
 				int rand = Random.Range (0, count);
 				// Create String Prefab
 				GameObject newString = (GameObject)Instantiate(Resources.Load("String"));
+				newString.name = "string"+l+"_"+count;
 				Button newStringButton = newString.GetComponent<Button> ();
 				newString.transform.SetParent (lines[l].transform);
 				Text newStringText = newString.transform.GetChild(0).transform.GetComponentInChildren<Text>();
