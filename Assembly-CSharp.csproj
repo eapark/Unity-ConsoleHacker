@@ -48,7 +48,6 @@
   <ItemGroup>
      <Compile Include="Assets\Scripts\ChangeButtonText.cs" />
      <Compile Include="Assets\Scripts\Game.cs" />
-     <Compile Include="Assets\Scripts\GameProgress.cs" />
      <Compile Include="Assets\Scripts\ParseDict.cs" />
      <Compile Include="Assets\Scripts\String.cs" />
      <None Include="Assets\Resources\falloutdict.txt" />

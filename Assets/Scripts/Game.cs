@@ -18,14 +18,16 @@ public class LineClass {
 }
 
 public class Game : MonoBehaviour {
-	private LineClass[] strings;
+	private LineClass[] strings; // array of LineClass
 	private List<string> selectedWords;
 	private int maxTries = 4;
-	private int tries;
+	private int tries = 4;
 	public bool answerFound = false;
+	private bool triesReset = false;
 	public string answer;
 	private int answerRow;
-	private List<int> wordRows;
+	private List<int> wordRows; // list of row nums that the words belong in
+	private List<int> hintRows; // list of row nums that the hints belong in
 
 	private GameObject canvas, ProgressPanel, leftPanel, rightPanel;
 	private GameObject[] panels; // leftPanel and rightPanel
@@ -38,12 +40,17 @@ public class Game : MonoBehaviour {
 	private int wordLength;
 	private GameObject[] lines; // array of Line Prefabs
 
+	private string difficulty = "novice"; // default difficulty
+
 	// Use this for initialization
 	void Start () {
+		SetupGame ();
+	}
 
+	void SetupGame() {
 		ParseDict newDict = new ParseDict ();
 
-		// Get Panels and Canvas
+		// Get in-game canvas and panels
 		canvas = GameObject.Find("Canvas");
 		leftPanel = GameObject.Find ("LeftPanel");
 		rightPanel = GameObject.Find ("RightPanel");
@@ -52,13 +59,14 @@ public class Game : MonoBehaviour {
 		lines = new GameObject[numPanel * numLine];
 		panels = new GameObject[]{leftPanel, rightPanel};
 
+		// For showing the progress of the game on the right side
 		progressQueue = new Queue<string> ();
 
 		InitializePanels ();
 
-		// Initialize array of LineClass
-		// A row has 12 characters (ie. length of string)
-		// There are 17 rows * 2 = 34 rows total
+		// Initialize array of LineClass, which is each row of text on the console
+		// A line has 12 characters (ie. length of string)
+		// There are 17 lines * 2 = 34 lines total
 		strings = new LineClass[numPanel * numLine];
 		for (int l = 0; l < strings.Length; l++) {
 			strings [l] = new LineClass ();
@@ -67,7 +75,7 @@ public class Game : MonoBehaviour {
 		tries = maxTries;
 
 		// Get selected words
-		selectedWords = new List<string>( newDict.SelectWords("novice") );
+		selectedWords = new List<string>( newDict.SelectWords(difficulty) );
 		int numWords = selectedWords.Count;
 		wordLength = selectedWords[0].Length;
 
@@ -120,7 +128,7 @@ public class Game : MonoBehaviour {
 		}
 
 		// Randomly choose which row the hints belong in
-		List<int> hintRows = new List<int>();
+		hintRows = new List<int>();
 		for (int h = 0; h < numHints; h++) {
 			int tempRow = Random.Range (0, numPanel * numLine);
 			// No two hints in one row
@@ -128,7 +136,7 @@ public class Game : MonoBehaviour {
 				tempRow = Random.Range (0, numPanel * numLine);
 			}
 
-			wordRows.Add(tempRow);
+			hintRows.Add(tempRow);
 			strings [tempRow].length += hints[h].Length;
 			strings [tempRow].wordList.Add (hints[h]);
 		}
@@ -141,6 +149,7 @@ public class Game : MonoBehaviour {
 				strings [l].length++;
 			}
 		}
+
 		// Create buttons out of the array, put them in the Lines in the Panels
 		for (int l = 0; l < lines.Length; l++) {
 			int count = strings [l].wordList.Count;
@@ -168,9 +177,11 @@ public class Game : MonoBehaviour {
 			}
 
 		}
+
+		UpdateProgressPanelText ();
 	}
 
-	// Fill left and right panels with Line prefabs
+	// Fill left and right panels with Line prefabs and add the prefab to 'lines'
 	void InitializePanels() {
 		for (int p = 0; p < numPanel; p++) {
 			GameObject panel = panels [p];
@@ -186,11 +197,15 @@ public class Game : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		// TODO
-		if (answerFound) {
-
-		}
-		else if (tries == 0) {
-
+		if (answerFound || tries == 0) {
+			// Deactivate all buttons
+			for (int l = 0; l < lines.Length; l++) {
+				foreach (Transform child in lines[ l ].transform) {
+					Text childText = child.GetComponentInChildren<Text> ();
+					Button childButton = child.GetComponent<Button> ();
+					DeactivateButton (childButton);
+				}
+			}
 		}
 	}
 
@@ -221,12 +236,13 @@ public class Game : MonoBehaviour {
 		}
 
 		// Check if hint was pressed (ie. buttonText is longer than 1 char and is punctuation)
-		// If true, remove a non-answer or by a 20% chance, reset tries
+		// If true, remove a non-answer or by a 20% chance, reset tries (but tries is reset only once)
 		if (buttonText.Length > 1 && !isLetter) {
 			progressQueue.Enqueue(buttonText);
 
 			float chance = Random.Range (0.0f, 1.0f);
 			if (chance > 0.2f) {
+				// Randomly choose a dud to remove
 				int dudRow = Random.Range(0, wordRows.Count);
 				while (dudRow != answerRow) {
 					dudRow = Random.Range(0, wordRows.Count);
@@ -238,13 +254,18 @@ public class Game : MonoBehaviour {
 					if ( System.Char.IsLetter(childText.text [0]) ) {
 						Button childButton = child.GetComponent<Button> ();
 						DeactivateButton (childButton);
+
+						wordRows.RemoveAt (dudRow);
 					}
 				}
 				progressQueue.Enqueue ("Dud Removed.");
 			}
 			else {
-				tries = maxTries;
-				progressQueue.Enqueue ("Tries Reset.");
+				if (!triesReset) {
+					tries = maxTries;
+					progressQueue.Enqueue ("Tries Reset.");
+					triesReset = true;
+				}
 			}
 		}
 
@@ -287,6 +308,9 @@ public class Game : MonoBehaviour {
 			progressText += temp;
 		}
 
-		GameProgress.text = progressText;
+		string triesText = "Tries: ";
+		triesText += tries + "/" + maxTries + "\n";
+
+		GameProgress.text = triesText + progressText;
 	}
 }
