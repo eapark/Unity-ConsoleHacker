@@ -39,16 +39,16 @@ public class ParseDict {
 		int selectedWordLength = 2;
 
 		// Difficulties and corresponding password lengths are from Fallout 4
-		if (System.String.Compare (difficulty, "novice", true) == 1) {
+		if (System.String.Compare (difficulty, "novice", true) == 0) {
 			selectedWordLength = Random.Range (4, 5);
 		}
-		else if (System.String.Compare(difficulty, "advanced", true) == 1){
+		else if (System.String.Compare(difficulty, "advanced", true) == 0){
 			selectedWordLength = Random.Range (6, 8);
 		}
-		else if(System.String.Compare(difficulty, "expert", true) == 1){
+		else if(System.String.Compare(difficulty, "expert", true) == 0){
 			selectedWordLength = Random.Range (9, 10);
 		}
-		else if(System.String.Compare(difficulty, "master", true) == 1){
+		else if(System.String.Compare(difficulty, "master", true) == 0){
 			selectedWordLength = Random.Range (11, 12);
 		}
 

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 
 using Random=UnityEngine.Random;
 
@@ -29,7 +30,7 @@ public class Game : MonoBehaviour {
 	private List<int> wordRows; // list of row nums that the words belong in
 	private List<int> hintRows; // list of row nums that the hints belong in
 
-	private GameObject canvas, ProgressPanel, leftPanel, rightPanel;
+	private GameObject canvas, ProgressPanel, leftPanel, rightPanel, fullPanel;
 	private GameObject[] panels; // leftPanel and rightPanel
 
 	private Queue<string> progressQueue;
@@ -44,7 +45,6 @@ public class Game : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		SetupGame ();
 	}
 
 	void SetupGame() {
@@ -196,17 +196,6 @@ public class Game : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-		// TODO
-		if (answerFound || tries == 0) {
-			// Deactivate all buttons
-			for (int l = 0; l < lines.Length; l++) {
-				foreach (Transform child in lines[ l ].transform) {
-					Text childText = child.GetComponentInChildren<Text> ();
-					Button childButton = child.GetComponent<Button> ();
-					DeactivateButton (childButton);
-				}
-			}
-		}
 	}
 
 	void onButtonClick( GameObject clickedString ) {
@@ -225,7 +214,10 @@ public class Game : MonoBehaviour {
 		}
 
 		if (likeliness == wordLength) {
+			tries--;
 			answerFound = true;
+			EndGame (true);
+			return;
 		}
 		else if ( likeliness != wordLength && isLetter ){
 			tries--;
@@ -233,6 +225,12 @@ public class Game : MonoBehaviour {
 			progressQueue.Enqueue (buttonText);
 			progressQueue.Enqueue ("Entry Denied.");
 			progressQueue.Enqueue ("Likeliness: " + likeliness + "/" + wordLength);
+		}
+
+		// Check if tries is 0
+		if (tries == 0) {
+			EndGame (false);
+			return;
 		}
 
 		// Check if hint was pressed (ie. buttonText is longer than 1 char and is punctuation)
@@ -312,5 +310,66 @@ public class Game : MonoBehaviour {
 		triesText += tries + "/" + maxTries + "\n";
 
 		GameProgress.text = triesText + progressText;
+	}
+
+	public void OnDifficultySelected(Button button){
+		difficulty = button.name;
+
+		// Clear everything in FullPanel
+		fullPanel = GameObject.Find("FullPanel");
+		foreach (Transform child in fullPanel.transform) {
+			Destroy (child.gameObject);
+		}
+
+		fullPanel.SetActive (false);
+		SetupGame ();
+	}
+
+	public void OnRestartClicked() {
+		SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+	}
+
+	void EndGame(bool victory){
+		// Clear all buttons
+		for (int l = 0; l < lines.Length; l++) {
+			foreach (Transform child in lines[ l ].transform) {
+				Destroy (child.gameObject);
+			}
+		}
+
+		leftPanel.SetActive (false);
+		rightPanel.SetActive (false);
+
+		fullPanel.SetActive (true);
+
+		string result = "";
+
+		if (victory) {
+			result = "Access Granted!";
+		} else {
+			result = "Access Denied";
+		}
+
+		GameObject resultText = new GameObject ("resultText");
+		resultText.transform.SetParent (fullPanel.transform);
+
+		Text txt = resultText.AddComponent<Text> ();
+
+		txt.text = result;
+		txt.font = Resources.Load<Font> ("Font/Consolas");
+		txt.fontSize = 20;
+		txt.color = Color.green;
+		txt.resizeTextForBestFit = true;
+		txt.horizontalOverflow = HorizontalWrapMode.Overflow;
+
+		// Add restart button
+		GameObject restart = (GameObject)Instantiate(Resources.Load("String"));
+		restart.name = "restart";
+		Button restartButton = restart.GetComponent<Button> ();
+		restart.transform.SetParent (fullPanel.transform);
+		Text restartText = restart.transform.GetChild(0).transform.GetComponentInChildren<Text>();
+		restartText.text = "Restart";
+
+		restartButton.onClick.AddListener (() => OnRestartClicked() );
 	}
 }
