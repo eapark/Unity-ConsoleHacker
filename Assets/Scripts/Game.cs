@@ -354,13 +354,13 @@ public class Game : MonoBehaviour {
 		resultText.transform.SetParent (fullPanel.transform);
 
 		Text txt = resultText.AddComponent<Text> ();
-
 		txt.text = result;
 		txt.font = Resources.Load<Font> ("Font/Consolas");
 		txt.fontSize = 20;
 		txt.color = Color.green;
 		txt.resizeTextForBestFit = true;
 		txt.horizontalOverflow = HorizontalWrapMode.Overflow;
+		txt.alignment = TextAnchor.MiddleCenter;
 
 		// Add restart button
 		GameObject restart = (GameObject)Instantiate(Resources.Load("String"));
